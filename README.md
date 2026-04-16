@@ -1,2 +1,73 @@
-# nashville-housing-data-cleaning-sql
-Complete Data Cleaning of Nashville Housing Dataset using SQL
+# Data Cleaning in SQL – Nashville Housing Dataset  
+**Portfolio Project**
+
+![Project Banner](CleanedSample.png)  
+
+## Project Overview
+Complete **end-to-end data cleaning** project in **SQL Server**. I transformed a raw, messy Nashville Housing dataset (56k+ records) into a clean, production-ready table suitable for analysis, reporting, and visualization.
+
+**Goal**: Transform raw, inconsistent data (NULLs, mixed formats and duplicates) into a clean, structured table ready for analysis, reporting,  and visualization.
+
+## Dataset
+- **Source**: Nashville Housing Data (public real-estate transactions)  
+- **Rows**: 56,416 housing sales records  
+- **Columns**: UniqueID, ParcelID, PropertyAddress, SaleDate, SalePrice, OwnerAddress, SoldAsVacant, etc.  
+- **Challenges**: Missing Values, inconsistent values ('Y/N' and 'Yes/No'), Street Address, City & State in a single column, Excel serial dates, duplicates.
+
+**Raw file**: [Nashville Housing Data for Data Cleaning.xlsx](Nashville%20Housing%20Data%20for%20Data%20Cleaning.xlsx)
+
+## Tools & Technologies
+- **SQL Server** (T-SQL)  
+- Techniques used: Self-joins, CTEs, Window functions, String manipulation, Date conversion, Data standardization, CASE statements
+- Git & GitHub
+
+## What I Cleaned & Transformed
+- Converted `SaleDate` (Excel serial) to proper `DATE` format → `SaleDateConverted`  using `TRY_CONVERT`
+- Populated missing `PropertyAddress` using **self-join** on `ParcelID`  
+- Split `PropertyAddress` into `SplitPropertyAddress` + `SplitPropertyCity`  using `SUBSTRING` and `CHARINDEX`
+- Split `OwnerAddress` into `SplitOwnerAddress`, `SplitOwnerCity`, `SplitOwnerState` using `PARSENAME`  
+- Standardized `SoldAsVacant` column (Y/N → Yes/No) using CASE statement  
+- Removed duplicate rows using CTE + `ROW_NUMBER()` (partitioned by ParcelID, PropertyAddress, SalePrice, SaleDate, LegalReference)  
+- Deleted duplicate columns (`OwnerAddress`, `PropertyAddress`, `SaleDate`)
+- Created indexes on ParcelID and SaleDateCOnverted for faster queries in the future
+
+**Full SQL script**: [housing_queries_final.sql](housing_queries_final.sql)
+
+## Querie Highlights from final script
+```sql
+-- Safe working copy
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'housing_data_cleaned')
+    SELECT * INTO housing_data_cleaned 
+    FROM NashvilleHousing;
+
+-- Populate missing addresses (self-join)
+UPDATE a
+SET a.PropertyAddress = ISNULL(a.PropertyAddress, b.PropertyAddress)
+FROM housing_data_cleaned a
+JOIN housing_data_cleaned b
+    ON a.ParcelID = b.ParcelID
+    AND a.UniqueID <> b.UniqueID
+WHERE a.PropertyAddress IS NULL;
+
+-- Remove duplicates with CTE
+WITH RowNumCTE AS (
+    SELECT *,
+        ROW_NUMBER() OVER (
+            PARTITION BY ParcelID, PropertyAddress, SalePrice, SaleDate, LegalReference
+            ORDER BY UniqueID
+        ) AS row_num
+    FROM housing_data_cleaned
+)
+DELETE FROM RowNumCTE WHERE row_num > 1;
+
+-- Sample summary query
+SELECT 
+    YEAR(SaleDateConverted) AS SaleYear,
+    COUNT(*) AS TotalSales,
+    FORMAT(AVG(SalePrice),'N2') AS AvgSalePrice,
+    FORMAT(MAX(SalePrice), 'N0') AS HighestSale
+FROM housing_data_cleaned
+GROUP BY YEAR(SaleDateConverted)
+ORDER BY SaleYear;
+```
+![Result of Summary query](SummaryQuery.png)
