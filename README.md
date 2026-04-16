@@ -1,5 +1,4 @@
 # Data Cleaning in SQL – Nashville Housing Dataset  
-**Portfolio Project**
 
 ![Project Banner](CleanedSample.png)  
 
@@ -71,3 +70,27 @@ GROUP BY YEAR(SaleDateConverted)
 ORDER BY SaleYear;
 ```
 ![Result of Summary query](SummaryQuery.png)
+
+## Results
+    ✅ SaleDate is properly formatted and usable in analysis
+    ✅ 0 missing PropertyAddress values
+    ✅ All addresses split along street,city and state columns
+    ✅ Uniform SoldAsVacant values (Yes/No only)
+    ✅ All duplicates removed
+    ✅ Database is indexed for faster future queries
+    ✅ Final table housing_data_cleaned is production-ready
+    ✅ Cleaned data exported as housing_data_cleaned.csv for next steps
+
+## How to Reproduce
+1. Clone the repo
+   ``` Bash
+    git clone https://github.com/mathyasg/nashville-housing-data-cleaning-sql.git
+   
+2. Import the Excel file into SQL Server as table **housing_data**
+3. Run [housing_queries_final.sql](housing_queries_final.sql) from top to bottom
+4. Query the final cleaned table
+   ``` sql
+   SELECT TOP 100 * FROM housing_data_cleaned ORDER BY SaleDateConverted DESC;
+
+## Next Step 
+Exploratory Data Analysis + Interactive Tableau Dashboard
