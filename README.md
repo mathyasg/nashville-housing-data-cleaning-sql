@@ -3,30 +3,25 @@
 ![Project Banner](CleanedSample.png)  
 
 ## Project Overview
-Complete **end-to-end data cleaning** project in **SQL Server**. I transformed a raw, messy Nashville Housing dataset (56k+ records) into a clean, production-ready table suitable for analysis, reporting, and visualization.
-
-**Goal**: Transform raw, inconsistent data (NULLs, mixed formats and duplicates) into a clean, structured table ready for analysis, reporting,  and visualization.
+Complete **end-to-end data cleaning** project in **SQL Server**. I transformed a raw, messy Nashville Housing dataset (56k+ records) into a clean, production-ready table suitable for downstream analysis, reporting, and visualization.
 
 ## Dataset
 - **Source**: Nashville Housing Data (public real-estate transactions)  
-- **Rows**: 56,416 housing sales records  
-- **Columns**: UniqueID, ParcelID, PropertyAddress, SaleDate, SalePrice, OwnerAddress, SoldAsVacant, etc.  
-- **Challenges**: Missing Values, inconsistent values ('Y/N' and 'Yes/No'), Street Address, City & State in a single column, Excel serial dates, duplicates.
+- **Rows**: 56,416 housing sales records   
+- **Challenges**: Missing and inconsistent values, Street Address, City & State in a single column, Excel serial dates, duplicates.
 
 **Raw file**: [Nashville Housing Data for Data Cleaning.xlsx](Nashville%20Housing%20Data%20for%20Data%20Cleaning.xlsx)
 
 ## Tools & Technologies
 - **SQL Server** (T-SQL)  
 - Techniques used: Self-joins, CTEs, Window functions, String manipulation, Date conversion, Data standardization, CASE statements
-- Git & GitHub
 
 ## What I Cleaned & Transformed
 - Converted `SaleDate` (Excel serial) to proper `DATE` format → `SaleDateConverted`  using `TRY_CONVERT`
 - Populated missing `PropertyAddress` using **self-join** on `ParcelID`  
-- Split `PropertyAddress` into `SplitPropertyAddress` + `SplitPropertyCity`  using `SUBSTRING` and `CHARINDEX`
-- Split `OwnerAddress` into `SplitOwnerAddress`, `SplitOwnerCity`, `SplitOwnerState` using `PARSENAME`  
+- Split addresses into individual components (street, city, state)
 - Standardized `SoldAsVacant` column (Y/N → Yes/No) using CASE statement  
-- Removed duplicate rows using CTE + `ROW_NUMBER()` (partitioned by ParcelID, PropertyAddress, SalePrice, SaleDate, LegalReference)  
+- Removed duplicate rows using CTE + `ROW_NUMBER()`
 - Deleted duplicate columns (`OwnerAddress`, `PropertyAddress`, `SaleDate`)
 - Created indexes on ParcelID and SaleDateCOnverted for faster queries in the future
 
@@ -78,7 +73,6 @@ ORDER BY SaleYear;
     ✅ Uniform SoldAsVacant values (Yes/No only)
     ✅ All duplicates removed
     ✅ Database is indexed for faster future queries
-    ✅ Final table housing_data_cleaned is production-ready
     ✅ Cleaned data exported as housing_data_cleaned.csv for next steps
 
 ## How to Reproduce
@@ -93,4 +87,4 @@ ORDER BY SaleYear;
    SELECT TOP 100 * FROM housing_data_cleaned ORDER BY SaleDateConverted DESC;
 
 ## Next Step 
-Exploratory Data Analysis + Interactive Tableau Dashboard
+Exploratory Data Analysis + Visualizations in Python
